@@ -27,7 +27,8 @@ def read_mask(simg,xml_file,output_dir):
     try:
         contours['Vertices']
         img, cimg, mask, bbox = get_contour(simg, contours, start_x, start_y)
-        img_all = np.concatenate((img, cimg), axis=1)
+        img_1 = np.concatenate((img, img, img), axis=1)
+        img_all = np.concatenate((img_1, img_1), axis=0)
         img_all_out = Image.fromarray(img_all)
         img_all_out_file = os.path.join(output_dir, '%s-x-ROI_%d-x-%d-x-%d-x-%d-x-%d.png' %
                                         (os.path.basename(xml_file).replace('.xml',''),0,
@@ -37,7 +38,8 @@ def read_mask(simg,xml_file,output_dir):
         for i in range(len(contours)):
             contour = contours[i]
             img, cimg, mask, bbox = get_contour(simg,  contour, start_x, start_y)
-            img_all = np.concatenate((img, cimg), axis=1)
+            img_1 = np.concatenate((img, img, img), axis=1)
+            img_all = np.concatenate((img_1, img_1), axis=0)
             img_all_out = Image.fromarray(img_all)
             img_all_out_file = os.path.join(output_dir, '%s-x-ROI_%d-x-%d-x-%d-x-%d-x-%d.png' %
                                         (os.path.basename(xml_file).replace('.xml',''),i,
