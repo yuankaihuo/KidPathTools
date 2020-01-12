@@ -4,7 +4,7 @@ import numpy as np
 from PIL import Image
 import os
 import cv2
-from read_mask import read_mask
+from read_mask_for_registration import read_mask
 import glob
 
 
@@ -13,13 +13,13 @@ if __name__ == "__main__":
     # scn_file = '/home-local/pathology/raw/Case 15-1.scn'
     # xml_file = '/home-local/pathology/raw/Case 15-1.xml'
 
-    source_dir = '/media/yuankai/MyDrive/pathology/scn'
-    output_dir = '/media/yuankai/MyDrive/pathology/ROIs'
+    source_dir = '/media/huoy1/48EAE4F7EAE4E264/Projects/detection/registration/data/atubular_slides'
+    output_dir = '/media/huoy1/48EAE4F7EAE4E264/Projects/detection/registration/data/output_overlay'
 
-    scn_files = glob.glob(os.path.join(source_dir,'*.scn'))
+    scn_files = glob.glob(os.path.join(source_dir,'*.svs'))
     scn_files.sort()
 
-    for i in range(len(scn_files)):
+    for i in range(1,len(scn_files)):
         scn_file = scn_files[i]
         basename = os.path.basename(scn_file)
         fname, surfix = os.path.splitext(basename)

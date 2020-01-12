@@ -13,8 +13,11 @@ if __name__ == "__main__":
     # scn_file = '/home-local/pathology/raw/Case 15-1.scn'
     # xml_file = '/home-local/pathology/raw/Case 15-1.xml'
 
-    source_dir = '/media/yuankai/MyDrive/pathology/scn'
-    output_dir = '/media/yuankai/MyDrive/pathology/ROIs'
+    # source_dir = '/home-local/pathology/scn/'
+    # output_dir = '/home-local/pathology/ROIs/'
+
+    source_dir = '/media/huoy1/48EAE4F7EAE4E264/Projects/from_haichun/batch_1_data/scn'
+    output_dir = '/media/huoy1/48EAE4F7EAE4E264/Projects/from_haichun/batch_1_data/ROIs'
 
     scn_files = glob.glob(os.path.join(source_dir,'*.scn'))
     scn_files.sort()

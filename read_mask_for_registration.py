@@ -22,7 +22,9 @@ def read_mask(simg,xml_file,output_dir):
             Masklayer = layers[0]
         contours = Masklayer['Regions']['Region']
 
-    start_x, start_y = get_nonblack_starting_point(simg)  #openslide.bounds-x,  openslide.bounds-y
+    # start_x, start_y = get_nonblack_starting_point(simg)
+    start_x = 0
+    start_y = 0
 
     try:
         contours['Vertices']
@@ -38,14 +40,24 @@ def read_mask(simg,xml_file,output_dir):
         for i in range(len(contours)):
             contour = contours[i]
             img, cimg, mask, bbox = get_contour(simg,  contour, start_x, start_y)
-            img_1 = np.concatenate((img, img, img, img), axis=1)
-            img_all = np.concatenate((img_1, img_1), axis=0)
-            img_all_out = Image.fromarray(img_all)
+            # Image.fromarray(cimg).resize((800, 800), Image.ANTIALIAS).show()
+
+            # img_1 = np.concatenate((img, img, img, img), axis=1)
+            # img_all = np.concatenate((img_1, img_1), axis=0)
+            img_1 = Image.fromarray(img)
+            new_height = 512
+            new_width = int(new_height * img_1.width / img_1.height)
+            img_all_out = img_1.resize((new_width, new_height), Image.ANTIALIAS)
+
             img_all_out_file = os.path.join(output_dir, '%s-x-ROI_%d-x-%d-x-%d-x-%d-x-%d.png' %
                                         (os.path.basename(xml_file).replace('.xml',''),i,
                                          bbox[0], bbox[1], bbox[2], bbox[3]))
             img_all_out.save(img_all_out_file)
 
+
+            numpy_out_file = os.path.join(output_dir, '%s-x-ROI_%d.npy' %
+                                        (os.path.basename(xml_file).replace('.xml',''),i))
+            np.save(numpy_out_file, img)
 
 def get_none_zero(black_arr):
 
@@ -132,14 +144,15 @@ def get_ROI(simg, region):
 
     start_x, start_y = get_nonblack_starting_point(simg)
     #isimg.read_region((44600, 82700), 0, (widths,heights).show()
-    max_widths = int(simg.properties['openslide.bounds-height'])
+    # max_widths = int(simg.properties['openslide.bounds-height'])
+    max_widths = int(simg.properties['aperio.OriginalHeight'])
     img = simg.read_region((start_x+xs, max_widths-yss+start_y), 0, (heights,widths))
     img = np.array(img.convert('RGB'))
     return img
 
 def get_contour(simg, contour, start_x, start_y):
-    max_height = int(simg.properties['openslide.bounds-width'])
-    max_widths = int(simg.properties['openslide.bounds-height'])
+    max_height = int(simg.properties['aperio.OriginalWidth'])
+    max_widths = int(simg.properties['aperio.OriginalHeight'])
     vertices = contour['Vertices']['Vertex']
     x_min = max_height
     x_max = 0
@@ -149,8 +162,8 @@ def get_contour(simg, contour, start_x, start_y):
 
 
     for vi in range(len(vertices)):
-        xraw = float(vertices[vi]['@Y'])
-        yraw = float(vertices[vi]['@X'])
+        xraw = float(vertices[vi]['@X'])
+        yraw = float(vertices[vi]['@Y'])
         if xraw < x_min:
             x_min = xraw
         if xraw > x_max:
@@ -175,35 +188,41 @@ def get_contour(simg, contour, start_x, start_y):
         widths = yy_max-yy_min
 
         xs = xx_min
-        yss = yy_max
+        yss = yy_min
 
 
-    cnt = np.zeros((len(vertices),1,2))
-    for vi in range(len(vertices)):
-        xx = float(vertices[vi]['@Y'])-xs
-        yy = yss - float(vertices[vi]['@X'])
-        cnt[vi,0,0] = int(xx)
-        cnt[vi,0,1] = int(yy)
+    # cnt = np.zeros((len(vertices),1,2))
+    # for vi in range(len(vertices)):
+    #     xx = float(vertices[vi]['@Y'])
+    #     yy = float(vertices[vi]['@X'])
+    #     cnt[vi,0,0] = int(xx)
+    #     cnt[vi,0,1] = int(yy)
 
 
 
     #isimg.read_region((44600, 82700), 0, (widths,heights).show()
 
-    read_x0 = start_x+xs
-    read_y0 = max_widths-yss+start_y
+    read_x0 = xs
+    read_y0 = yss
     read_height = heights
     read_widths = widths
     bbox = (read_x0, read_y0, read_height, read_widths)
 
     img = simg.read_region((read_x0, read_y0), 0, (read_height,read_widths))
+    # simg.read_region((read_x0, read_y0), 0, (read_height, read_widths)).resize([100,100],Image.ANTIALIAS).show()
+    # img = simg.read_region((10000, 36000), 0, (5000,5000)).resize([100,100],Image.ANTIALIAS).show()
+
     img = np.array(img.convert('RGB'))
 
     cimg = img.copy()
     vertices = contour['Vertices']['Vertex']
     cnt = np.zeros((len(vertices),1,2))
     for vi in range(len(vertices)):
-        xx = float(vertices[vi]['@Y'])-xs
-        yy = yss - float(vertices[vi]['@X'])
+        xx = float(vertices[vi]['@X'])-xs
+        yy = float(vertices[vi]['@Y'])-yss
+
+        # xx = float(vertices[vi]['@Y'])-xs
+        # yy = yss - float(vertices[vi]['@X'])
         cnt[vi,0,0] = int(xx)
         cnt[vi,0,1] = int(yy)
 
