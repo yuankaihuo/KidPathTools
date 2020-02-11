@@ -11,40 +11,73 @@ def read_mask(simg,xml_file,output_dir):
     with open(xml_file) as fd:
         doc = xmltodict.parse(fd.read())
     layers = doc['Annotations']['Annotation']
-    try :
-        contours = layers['Regions']['Region']
-    except:
-        if len(layers) == 2:
-            BBlayer = layers[0]
-            regions = BBlayer['Regions']['Region']
-            Masklayer = layers[1]
-        else:
-            Masklayer = layers[0]
-        contours = Masklayer['Regions']['Region']
 
-    start_x, start_y = get_nonblack_starting_point(simg)  #openslide.bounds-x,  openslide.bounds-y
+    start_x, start_y = get_nonblack_starting_point(simg)
 
     try:
-        contours['Vertices']
-        img, cimg, mask, bbox = get_contour(simg, contours, start_x, start_y)
-        img_1 = np.concatenate((img, img, img, img), axis=1)
-        img_all = np.concatenate((img_1, img_1), axis=0)
-        img_all_out = Image.fromarray(img_all)
-        img_all_out_file = os.path.join(output_dir, '%s-x-ROI_%d-x-%d-x-%d-x-%d-x-%d.png' %
-                                        (os.path.basename(xml_file).replace('.xml',''),0,
-                                         bbox[0], bbox[1], bbox[2], bbox[3]))
-        img_all_out.save(img_all_out_file)
+        multi_contours = layers['Regions']
+
+        if(len(multi_contours)<2):
+            notFound = multi_contours[0]
+
+        else:
+            contours = multi_contours['Region']
+
+            try:
+                contours['Vertices']
+                img, cimg, mask, bbox = get_contour(simg, contours, start_x, start_y)
+                    # img_1 = np.concatenate((img, img, img, img), axis=1)
+                # img_all = np.concatenate((img_1, img_1), axis=0)
+                img_all_out = Image.fromarray(img)
+                img_all_out_file = os.path.join(output_dir, '%s-x-ROI_%d-x-%d-x-%d-x-%d-x-%d.png' %
+                                                (os.path.basename(xml_file).replace('.xml', ''), 0,
+                                                bbox[0], bbox[1], bbox[2], bbox[3]))
+                img_all_out.save(img_all_out_file)
+
+            except:
+                for j in range(len(contours)):
+                    contour = contours[j]
+                    img, cimg, mask, bbox = get_contour(simg, contour, start_x, start_y)
+                    # img_1 = np.concatenate((img, img, img, img), axis=1)
+                    # img_all = np.concatenate((img_1, img_1), axis=0)
+                    img_all_out = Image.fromarray(img)
+                    img_all_out_file = os.path.join(output_dir, '%s-x-ROI_%d-x-%d-x-%d-x-%d-x-%d.png' %
+                                                    (os.path.basename(xml_file).replace('.xml', ''), j,
+                                                    bbox[0], bbox[1], bbox[2], bbox[3]))
+                    img_all_out.save(img_all_out_file)
+
     except:
-        for i in range(len(contours)):
-            contour = contours[i]
-            img, cimg, mask, bbox = get_contour(simg,  contour, start_x, start_y)
-            img_1 = np.concatenate((img, img, img, img), axis=1)
-            img_all = np.concatenate((img_1, img_1), axis=0)
-            img_all_out = Image.fromarray(img_all)
-            img_all_out_file = os.path.join(output_dir, '%s-x-ROI_%d-x-%d-x-%d-x-%d-x-%d.png' %
-                                        (os.path.basename(xml_file).replace('.xml',''),i,
-                                         bbox[0], bbox[1], bbox[2], bbox[3]))
-            img_all_out.save(img_all_out_file)
+        for i in range(len(layers)):
+            contours = layers[i]['Regions']
+
+            if(len(contours)<2):
+                notFound = layers[0]
+
+            else:
+                contours = contours['Region']
+
+                try:
+                    contours['Vertices']
+                    img, cimg, mask, bbox = get_contour(simg, contours, start_x, start_y)
+                    # img_1 = np.concatenate((img, img, img, img), axis=1)
+                    # img_all = np.concatenate((img_1, img_1), axis=0)
+                    img_all_out = Image.fromarray(img)
+                    img_all_out_file = os.path.join(output_dir, '%s-x-ROI_%d-x-%d-x-%d-x-%d-x-%d.png' %
+                                                    (os.path.basename(xml_file).replace('.xml', ''), 0,
+                                                        bbox[0], bbox[1], bbox[2], bbox[3]))
+                    img_all_out.save(img_all_out_file)
+
+                except:
+                    for j in range(len(contours)):
+                        contour = contours[j]
+                        img, cimg, mask, bbox = get_contour(simg, contour, start_x, start_y)
+                        # img_1 = np.concatenate((img, img, img, img), axis=1)
+                        # img_all = np.concatenate((img_1, img_1), axis=0)
+                        img_all_out = Image.fromarray(img)
+                        img_all_out_file = os.path.join(output_dir, '%s-x-ROI_%d-x-%d-x-%d-x-%d-x-%d.png' %
+                                                        (os.path.basename(xml_file).replace('.xml', ''), j,
+                                                            bbox[0], bbox[1], bbox[2], bbox[3]))
+                        img_all_out.save(img_all_out_file)
 
 
 def get_none_zero(black_arr):
