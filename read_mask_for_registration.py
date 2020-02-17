@@ -4,6 +4,127 @@ import numpy as np
 from PIL import Image
 import os
 import cv2
+import pandas as pd
+
+def big_contain_small(big_box, small_box):
+    if big_box[0] < small_box[0] and big_box[1] < small_box[1] and big_box[0]+big_box[2] > small_box[0]+small_box[2] and big_box[1]+big_box[3] > small_box[1]+small_box[3]:
+        return True
+    else:
+        return False
+
+def get_bbox_from_mask(img):
+    rows = np.any(img, axis=1)
+    cols = np.any(img, axis=0)
+    rmin, rmax = np.where(rows)[0][[0, -1]]
+    cmin, cmax = np.where(cols)[0][[0, -1]]
+
+    return rmin, rmax, cmin, cmax
+
+
+def read_annotations(simg, xml_file, output_dir):
+    new_height = 4000
+
+
+    # read region
+    with open(xml_file) as fd:
+        doc = xmltodict.parse(fd.read())
+
+    try:
+        layer1 = doc['Annotations']['Annotation'][0]
+        layer2 = doc['Annotations']['Annotation'][1]
+        # two layers
+        contours = layer1['Regions']['Region']
+        contours2 = layer2['Regions']['Region']
+    except:
+        if os.path.basename(xml_file) == '14-50.xml':
+            contours = doc['Annotations']['Annotation']['Regions']['Region'][0:14]
+            contours2 = doc['Annotations']['Annotation']['Regions']['Region'][14:-1]
+
+    start_x = 0
+    start_y = 0
+
+    bboxs_big = []
+    for i in range(len(contours)):
+        contour = contours[i]
+        bbox = get_bbox(simg, contour, start_x, start_y)
+        bboxs_big.append(bbox)
+
+    img, cimg, mask, bbox = get_contour(simg, contours[2], start_x, start_y)
+    img_1 = Image.fromarray(img)
+    new_width = int(new_height * img_1.width / img_1.height)
+
+
+    bboxs_small = []
+    for j in range(len(contours2)):
+        contour2 = contours2[j]
+        bbox2 = get_bbox(simg, contour2, start_x, start_y)
+        bboxs_small.append(bbox2)
+
+    bbox_dicts = []
+    for bi in range(len(bboxs_big)):
+        bbox_dict = {}
+        bbox_dict['big'] = bboxs_big[bi]
+        bbox_dict['small'] = None
+        bbox_dict['coordinate'] = None
+        bbox_dict['reshape_coordinate'] = None
+        big_box = bboxs_big[bi]
+        found_small_count = 0
+        for bj in range(len(bboxs_small)):
+            small_box = bboxs_small[bj]
+            if big_contain_small(big_box, small_box):
+                bbox_dict['small'] = small_box
+
+                numpy_out_file = os.path.join(output_dir, '%s-x-ROI_%d-x-BOX_%d.npy' %
+                                              (os.path.basename(xml_file).replace('.xml', ''), bi, found_small_count))
+                if os.path.exists(numpy_out_file):
+                    continue
+
+                relative_box = np.zeros(4)
+                relative_box[0] = small_box[0] - big_box[0]
+                relative_box[1] = small_box[1] - big_box[1]
+                relative_box[2] = small_box[2]
+                relative_box[3] = small_box[3]
+
+
+                img = np.zeros((big_box[3], big_box[2], 3), dtype=np.uint8)
+                relative_box = relative_box.astype(np.int)
+                img[relative_box[1]:(relative_box[1]+relative_box[3]),relative_box[0]:(relative_box[0]+relative_box[2]),:] = 255
+
+
+                # img3 = simg.read_region((big_box[0], big_box[1]), 0, (big_box[2], big_box[3]))
+                # # # simg.read_region((read_x0, read_y0), 0, (read_height, read_widths)).resize([100,100],Image.ANTIALIAS).show()
+                # # # img = simg.read_region((10000, 36000), 0, (5000,5000)).resize([100,100],Image.ANTIALIAS).show()
+                # relative_box = relative_box.astype(np.int)
+                # img3 = np.array(img3.convert('RGB'))
+                # img4 = img3[relative_box[1]:(relative_box[1]+relative_box[3]),relative_box[0]:(relative_box[0]+relative_box[2]),:]
+
+                img_1 = Image.fromarray(img)
+
+                new_width = int(new_height * img_1.width / img_1.height)
+                img_all_out = img_1.resize((new_width, new_height), Image.NEAREST)
+                rmin, rmax, cmin, cmax = get_bbox_from_mask(np.array(img_all_out))
+                resize_box = [cmin, rmin, (cmax-cmin), (rmax-rmin)]
+
+                img_all_out_file = os.path.join(output_dir, '%s-x-ROI_%d-x-BOX_%d-x-%d-x-%d-x-%d-x-%d.jpg' %
+                                                (os.path.basename(xml_file).replace('.xml', ''), bi, found_small_count,
+                                                 resize_box[0], resize_box[1], resize_box[2], resize_box[3]))
+                img_all_out.save(img_all_out_file)
+
+
+                np.save(numpy_out_file, img)
+
+
+
+                # bbox_dict['coordinate'] =
+                found_small_count = found_small_count+1
+                break
+        # bbox_dicts.append(bbox_dict)
+        assert found_small_count<2
+
+
+    # bboxs_big
+    # bboxs_small
+
 
 def read_mask(simg,xml_file,output_dir):
 
@@ -32,7 +153,7 @@ def read_mask(simg,xml_file,output_dir):
         img_1 = np.concatenate((img, img, img, img), axis=1)
         img_all = np.concatenate((img_1, img_1), axis=0)
         img_all_out = Image.fromarray(img_all)
-        img_all_out_file = os.path.join(output_dir, '%s-x-ROI_%d-x-%d-x-%d-x-%d-x-%d.png' %
+        img_all_out_file = os.path.join(output_dir, '%s-x-ROI_%d-x-%d-x-%d-x-%d-x-%d.jpg' %
                                         (os.path.basename(xml_file).replace('.xml',''),0,
                                          bbox[0], bbox[1], bbox[2], bbox[3]))
         img_all_out.save(img_all_out_file)
@@ -45,11 +166,11 @@ def read_mask(simg,xml_file,output_dir):
             # img_1 = np.concatenate((img, img, img, img), axis=1)
             # img_all = np.concatenate((img_1, img_1), axis=0)
             img_1 = Image.fromarray(img)
-            new_height = 512
+            new_height = 4000
             new_width = int(new_height * img_1.width / img_1.height)
             img_all_out = img_1.resize((new_width, new_height), Image.ANTIALIAS)
 
-            img_all_out_file = os.path.join(output_dir, '%s-x-ROI_%d-x-%d-x-%d-x-%d-x-%d.png' %
+            img_all_out_file = os.path.join(output_dir, '%s-x-ROI_%d-x-%d-x-%d-x-%d-x-%d.jpg' %
                                         (os.path.basename(xml_file).replace('.xml',''),i,
                                          bbox[0], bbox[1], bbox[2], bbox[3]))
             img_all_out.save(img_all_out_file)
@@ -285,3 +406,65 @@ def get_MASK(simg, region, contour):
 
 
     return img, cimg, mask
+
+
+
+def get_bbox(simg, contour, start_x, start_y):
+    max_height = int(simg.properties['aperio.OriginalWidth'])
+    max_widths = int(simg.properties['aperio.OriginalHeight'])
+    vertices = contour['Vertices']['Vertex']
+    x_min = max_height
+    x_max = 0
+    y_min = max_widths
+    y_max = 0
+
+
+
+    for vi in range(len(vertices)):
+        xraw = float(vertices[vi]['@X'])
+        yraw = float(vertices[vi]['@Y'])
+        if xraw < x_min:
+            x_min = xraw
+        if xraw > x_max:
+            x_max = xraw
+        if yraw < y_min:
+            y_min = yraw
+        if yraw > y_max:
+            y_max = yraw
+
+        x_min = int(round(x_min))
+        x_max = int(round(x_max))
+        y_min = int(round(y_min))
+        y_max = int(round(y_max))
+
+        # add cropping
+        xx_min = max(x_min-50, 0)
+        xx_max = min(x_max+50, max_height)
+        yy_min = max(y_min-50, 0)
+        yy_max = min(y_max+50, max_widths)
+
+        heights = xx_max-xx_min
+        widths = yy_max-yy_min
+
+        xs = xx_min
+        yss = yy_min
+
+
+    # cnt = np.zeros((len(vertices),1,2))
+    # for vi in range(len(vertices)):
+    #     xx = float(vertices[vi]['@Y'])
+    #     yy = float(vertices[vi]['@X'])
+    #     cnt[vi,0,0] = int(xx)
+    #     cnt[vi,0,1] = int(yy)
+
+
+
+    #isimg.read_region((44600, 82700), 0, (widths,heights).show()
+
+    read_x0 = xs
+    read_y0 = yss
+    read_height = heights
+    read_widths = widths
+    bbox = (read_x0, read_y0, read_height, read_widths)
+
+    return bbox
