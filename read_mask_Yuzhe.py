@@ -12,7 +12,13 @@ def read_mask(simg,xml_file,output_dir):
         doc = xmltodict.parse(fd.read())
     layers = doc['Annotations']['Annotation']
 
-    start_x, start_y = get_nonblack_starting_point(simg)
+    # start_x, start_y = get_nonblack_starting_point(simg)
+    start_x = np.int(simg.properties['openslide.bounds-x'])
+    start_y = np.int(simg.properties['openslide.bounds-y'])
+    width_x = np.int(simg.properties['openslide.bounds-width'])
+    height_y = np.int(simg.properties['openslide.bounds-height'])
+    end_x = start_x + width_x
+    end_y = start_y + height_y
 
     try:
         multi_contours = layers['Regions']
@@ -25,26 +31,17 @@ def read_mask(simg,xml_file,output_dir):
 
             try:
                 contours['Vertices']
-                img, cimg, mask, bbox = get_contour(simg, contours, start_x, start_y)
+                img, cimg, mask, bbox, img_iso, cimg_iso, mask_iso  = get_contour(simg, contours, start_x, start_y)
                     # img_1 = np.concatenate((img, img, img, img), axis=1)
                 # img_all = np.concatenate((img_1, img_1), axis=0)
-                img_all_out = Image.fromarray(img)
-                img_all_out_file = os.path.join(output_dir, '%s-x-ROI_%d-x-%d-x-%d-x-%d-x-%d.png' %
-                                                (os.path.basename(xml_file).replace('.xml', ''), 0,
-                                                bbox[0], bbox[1], bbox[2], bbox[3]))
-                img_all_out.save(img_all_out_file)
-
+                save_all_images(img, cimg, mask, bbox, img_iso, cimg_iso, mask_iso, output_dir, xml_file, 0)
             except:
                 for j in range(len(contours)):
                     contour = contours[j]
-                    img, cimg, mask, bbox = get_contour(simg, contour, start_x, start_y)
+                    img, cimg, mask, bbox, img_iso, cimg_iso, mask_iso  = get_contour(simg, contour, start_x, start_y)
                     # img_1 = np.concatenate((img, img, img, img), axis=1)
                     # img_all = np.concatenate((img_1, img_1), axis=0)
-                    img_all_out = Image.fromarray(img)
-                    img_all_out_file = os.path.join(output_dir, '%s-x-ROI_%d-x-%d-x-%d-x-%d-x-%d.png' %
-                                                    (os.path.basename(xml_file).replace('.xml', ''), j,
-                                                    bbox[0], bbox[1], bbox[2], bbox[3]))
-                    img_all_out.save(img_all_out_file)
+                    save_all_images(img, cimg, mask, bbox, img_iso, cimg_iso, mask_iso, output_dir, xml_file, j)
 
     except:
         for i in range(len(layers)):
@@ -58,27 +55,37 @@ def read_mask(simg,xml_file,output_dir):
 
                 try:
                     contours['Vertices']
-                    img, cimg, mask, bbox = get_contour(simg, contours, start_x, start_y)
+                    img, cimg, mask, bbox, img_iso, cimg_iso, mask_iso  = get_contour(simg, contours, start_x, start_y)
                     # img_1 = np.concatenate((img, img, img, img), axis=1)
                     # img_all = np.concatenate((img_1, img_1), axis=0)
-                    img_all_out = Image.fromarray(img)
-                    img_all_out_file = os.path.join(output_dir, '%s-x-ROI_%d-x-%d-x-%d-x-%d-x-%d.png' %
-                                                    (os.path.basename(xml_file).replace('.xml', ''), 0,
-                                                        bbox[0], bbox[1], bbox[2], bbox[3]))
-                    img_all_out.save(img_all_out_file)
+                    save_all_images(img, cimg, mask, bbox, img_iso, cimg_iso, mask_iso, output_dir, xml_file, 0)
 
                 except:
                     for j in range(len(contours)):
                         contour = contours[j]
-                        img, cimg, mask, bbox = get_contour(simg, contour, start_x, start_y)
-                        # img_1 = np.concatenate((img, img, img, img), axis=1)
-                        # img_all = np.concatenate((img_1, img_1), axis=0)
-                        img_all_out = Image.fromarray(img)
-                        img_all_out_file = os.path.join(output_dir, '%s-x-ROI_%d-x-%d-x-%d-x-%d-x-%d.png' %
-                                                        (os.path.basename(xml_file).replace('.xml', ''), j,
-                                                            bbox[0], bbox[1], bbox[2], bbox[3]))
-                        img_all_out.save(img_all_out_file)
+                        img, cimg, mask, bbox, img_iso, cimg_iso, mask_iso = get_contour(simg, contour, start_x, start_y)
+                        save_all_images(img, cimg, mask, bbox, img_iso, cimg_iso, mask_iso, output_dir, xml_file,j)
 
+def save_all_images(img, cimg, mask, bbox, img_iso, cimg_iso, mask_iso, output_dir, xml_file, roi_num):
+    # img_1 = np.concatenate((img, img, img, img), axis=1)
+    # img_all = np.concatenate((img_1, img_1), axis=0)
+    save_one_image(img, output_dir, 'image', xml_file, roi_num, bbox)
+    save_one_image(cimg, output_dir, 'contour', xml_file, roi_num, bbox)
+    save_one_image(mask, output_dir, 'mask', xml_file, roi_num, bbox)
+    save_one_image(img_iso, output_dir, 'image_iso', xml_file, roi_num, bbox)
+    save_one_image(cimg_iso, output_dir, 'contour_iso', xml_file, roi_num, bbox)
+    save_one_image(mask_iso, output_dir, 'mask_iso', xml_file, roi_num, bbox)
+
+
+def save_one_image(img, output_dir, dir_name, xml_file, roi_num, bbox):
+    img_all_out = Image.fromarray(img)
+    output_dir = os.path.join(output_dir, dir_name)
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    img_all_out_file = os.path.join(output_dir, '%s-x-ROI_%d-x-%d-x-%d-x-%d-x-%d.png' %
+                                    (os.path.basename(xml_file).replace('.xml', ''), roi_num,
+                                        bbox[0], bbox[1], bbox[2], bbox[3]))
+    img_all_out.save(img_all_out_file)
 
 def get_none_zero(black_arr):
 
@@ -247,9 +254,21 @@ def get_contour(simg, contour, start_x, start_y):
     cv2.drawContours(mask, [cnt.astype(int)], -1, (255, 255, 255), -1)
 
     # Image.fromarray(cimg).show()
+    length_iso = np.max([read_height, read_widths])
+    length_iso = np.int(length_iso*1.2)  #have boarder
+    iso_offset_h = np.int((length_iso-read_height)/2)
+    iso_offset_w = np.int((length_iso - read_widths) / 2)
 
+    img_iso = simg.read_region((read_x0-iso_offset_h, read_y0-iso_offset_w), 0, (length_iso,length_iso))
+    img_iso = np.array(img_iso.convert('RGB'))
 
-    return img, cimg, mask, bbox
+    cimg_iso = img_iso.copy()
+    cimg_iso[iso_offset_w:(iso_offset_w+read_widths),iso_offset_h:(iso_offset_h+read_height),:] = cimg
+
+    mask_iso = np.zeros(img_iso.shape, dtype=np.uint8)
+    mask_iso[iso_offset_w:(iso_offset_w + read_widths), iso_offset_h:(iso_offset_h + read_height), :] = mask
+
+    return img, cimg, mask, bbox, img_iso, cimg_iso, mask_iso
 
 def get_MASK(simg, region, contour):
     vertices = region['Vertices']['Vertex']
@@ -277,6 +296,7 @@ def get_MASK(simg, region, contour):
     start_x, start_y = get_nonblack_starting_point(simg)
     #isimg.read_region((44600, 82700), 0, (widths,heights).show()
     max_height = int(simg.properties['openslide.bounds-height'])
+
     img = simg.read_region((start_x+xs, max_height-yss+start_y), 0, (heights,widths))
     img = np.array(img.convert('RGB'))
 

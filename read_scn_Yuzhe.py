@@ -13,13 +13,18 @@ if __name__ == "__main__":
     # scn_file = '/home-local/pathology/raw/Case 15-1.scn'
     # xml_file = '/home-local/pathology/raw/Case 15-1.xml'
 
-    # source_dir = '/home-local/pathology/scn/'
-    # output_dir = '/home-local/pathology/ROIs/'
+    # source_dir = '/media/huoy1/48EAE4F7EAE4E264/Projects/from_haichun/R24 scan slides'
+    # output_dir = '/media/huoy1/48EAE4F7EAE4E264/Projects/detection/ROI_images/R24'
 
-    source_dir = '/Volumes/Yuzhe_Disk/Pathology/R24 scan slides'
-    output_dir = '/Volumes/Yuzhe_Disk/Pathology/Output_new'
+    source_dir = '/media/huoy1/48EAE4F7EAE4E264/Projects/from_haichun/batch_1_data/scn'
+    output_dir = '/media/huoy1/48EAE4F7EAE4E264/Projects/detection/ROI_images/batch1'
 
-    scn_files = glob.glob(os.path.join(source_dir,'*.scn'))
+    # source_dir = '/Volumes/Yuzhe_Disk/Pathology/R24 scan slides'
+    # output_dir = '/Volumes/Yuzhe_Disk/Pathology/Output_new'
+
+    scn_files1 = glob.glob(os.path.join(source_dir,'*.scn'))
+    scn_files2 = glob.glob(os.path.join(source_dir, '*.sys'))
+    scn_files = scn_files1 + scn_files2
     scn_files.sort()
 
     for i in range(len(scn_files)):
