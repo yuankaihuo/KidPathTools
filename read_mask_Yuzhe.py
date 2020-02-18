@@ -20,70 +20,96 @@ def read_mask(simg,xml_file,output_dir):
     end_x = start_x + width_x
     end_y = start_y + height_y
 
-    try:
-        multi_contours = layers['Regions']
 
-        if(len(multi_contours)<2):
-            notFound = multi_contours[0]
+    if isinstance(layers, (dict)):
+        layers = [layers]
 
+    for i in range(len(layers)):
+        regions = layers[i]['Regions']
+
+        if isinstance(layers[i]['Attributes'], dict):
+            clss_name = layers[i]['Attributes']['Attribute']['@Name']
         else:
-            contours = multi_contours['Region']
+            clss_name = 'unknown'
 
-            try:
-                contours['Vertices']
-                img, cimg, mask, bbox, img_iso, cimg_iso, mask_iso  = get_contour(simg, contours, start_x, start_y)
-                    # img_1 = np.concatenate((img, img, img, img), axis=1)
-                # img_all = np.concatenate((img_1, img_1), axis=0)
-                save_all_images(img, cimg, mask, bbox, img_iso, cimg_iso, mask_iso, output_dir, xml_file, 0)
-            except:
-                for j in range(len(contours)):
-                    contour = contours[j]
-                    img, cimg, mask, bbox, img_iso, cimg_iso, mask_iso  = get_contour(simg, contour, start_x, start_y)
-                    # img_1 = np.concatenate((img, img, img, img), axis=1)
-                    # img_all = np.concatenate((img_1, img_1), axis=0)
-                    save_all_images(img, cimg, mask, bbox, img_iso, cimg_iso, mask_iso, output_dir, xml_file, j)
+        if (len(regions) < 2):
+            notFound = layers[0]
+        else:
+            regions = regions['Region']
 
-    except:
-        for i in range(len(layers)):
-            contours = layers[i]['Regions']
+            if isinstance(regions, (dict)):
+                regions = [regions]
 
-            if(len(contours)<2):
-                notFound = layers[0]
+            for j in range(len(regions)):
+                contour = regions[j]
+                img, cimg, mask, bbox, img_iso, cimg_iso, mask_iso = get_contour(simg, contour, start_x, start_y)
+                save_all_images(img, cimg, mask, bbox, img_iso, cimg_iso, mask_iso, output_dir, xml_file, j, clss_name)
 
-            else:
-                contours = contours['Region']
 
-                try:
-                    contours['Vertices']
-                    img, cimg, mask, bbox, img_iso, cimg_iso, mask_iso  = get_contour(simg, contours, start_x, start_y)
-                    # img_1 = np.concatenate((img, img, img, img), axis=1)
-                    # img_all = np.concatenate((img_1, img_1), axis=0)
-                    save_all_images(img, cimg, mask, bbox, img_iso, cimg_iso, mask_iso, output_dir, xml_file, 0)
+    # try:
+    #
+    #     if(len(multi_contours)<2):
+    #         notFound = multi_contours[0]
+    #
+    #     else:
+    #         contours = multi_contours['Region']
+    #
+    #         try:
+    #             contours['Vertices']
+    #             img, cimg, mask, bbox, img_iso, cimg_iso, mask_iso  = get_contour(simg, contours, start_x, start_y)
+    #                 # img_1 = np.concatenate((img, img, img, img), axis=1)
+    #             # img_all = np.concatenate((img_1, img_1), axis=0)
+    #             save_all_images(img, cimg, mask, bbox, img_iso, cimg_iso, mask_iso, output_dir, xml_file, 0)
+    #
+    #         except:
+    #             for j in range(len(contours)):
+    #                 contour = contours[j]
+    #                 img, cimg, mask, bbox, img_iso, cimg_iso, mask_iso  = get_contour(simg, contour, start_x, start_y)
+    #                 # img_1 = np.concatenate((img, img, img, img), axis=1)
+    #                 # img_all = np.concatenate((img_1, img_1), axis=0)
+    #                 save_all_images(img, cimg, mask, bbox, img_iso, cimg_iso, mask_iso, output_dir, xml_file, j)
+    #
+    # except:
+    #     for i in range(len(layers)):
+    #         contours = layers[i]['Regions']
+    #
+    #         if(len(contours)<2):
+    #             notFound = layers[0]
+    #
+    #         else:
+    #             contours = contours['Region']
+    #
+    #             try:
+    #                 contours['Vertices']
+    #                 img, cimg, mask, bbox, img_iso, cimg_iso, mask_iso  = get_contour(simg, contours, start_x, start_y)
+    #                 # img_1 = np.concatenate((img, img, img, img), axis=1)
+    #                 # img_all = np.concatenate((img_1, img_1), axis=0)
+    #                 save_all_images(img, cimg, mask, bbox, img_iso, cimg_iso, mask_iso, output_dir, xml_file, 0)
+    #
+    #             except:
+    #                 for j in range(len(contours)):
+    #                     contour = contours[j]
+    #                     img, cimg, mask, bbox, img_iso, cimg_iso, mask_iso = get_contour(simg, contour, start_x, start_y)
+    #                     save_all_images(img, cimg, mask, bbox, img_iso, cimg_iso, mask_iso, output_dir, xml_file,j)
 
-                except:
-                    for j in range(len(contours)):
-                        contour = contours[j]
-                        img, cimg, mask, bbox, img_iso, cimg_iso, mask_iso = get_contour(simg, contour, start_x, start_y)
-                        save_all_images(img, cimg, mask, bbox, img_iso, cimg_iso, mask_iso, output_dir, xml_file,j)
-
-def save_all_images(img, cimg, mask, bbox, img_iso, cimg_iso, mask_iso, output_dir, xml_file, roi_num):
+def save_all_images(img, cimg, mask, bbox, img_iso, cimg_iso, mask_iso, output_dir, xml_file, roi_num, clss_name):
     # img_1 = np.concatenate((img, img, img, img), axis=1)
     # img_all = np.concatenate((img_1, img_1), axis=0)
-    save_one_image(img, output_dir, 'image', xml_file, roi_num, bbox)
-    save_one_image(cimg, output_dir, 'contour', xml_file, roi_num, bbox)
-    save_one_image(mask, output_dir, 'mask', xml_file, roi_num, bbox)
-    save_one_image(img_iso, output_dir, 'image_iso', xml_file, roi_num, bbox)
-    save_one_image(cimg_iso, output_dir, 'contour_iso', xml_file, roi_num, bbox)
-    save_one_image(mask_iso, output_dir, 'mask_iso', xml_file, roi_num, bbox)
+    save_one_image(img, output_dir, 'image', xml_file, roi_num, bbox, clss_name)
+    save_one_image(cimg, output_dir, 'contour', xml_file, roi_num, bbox, clss_name)
+    save_one_image(mask, output_dir, 'mask', xml_file, roi_num, bbox, clss_name)
+    save_one_image(img_iso, output_dir, 'image_iso', xml_file, roi_num, bbox, clss_name)
+    save_one_image(cimg_iso, output_dir, 'contour_iso', xml_file, roi_num, bbox, clss_name)
+    save_one_image(mask_iso, output_dir, 'mask_iso', xml_file, roi_num, bbox, clss_name)
 
 
-def save_one_image(img, output_dir, dir_name, xml_file, roi_num, bbox):
+def save_one_image(img, output_dir, dir_name, xml_file, roi_num, bbox, clss_name):
     img_all_out = Image.fromarray(img)
     output_dir = os.path.join(output_dir, dir_name)
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
-    img_all_out_file = os.path.join(output_dir, '%s-x-ROI_%d-x-%d-x-%d-x-%d-x-%d.png' %
-                                    (os.path.basename(xml_file).replace('.xml', ''), roi_num,
+    img_all_out_file = os.path.join(output_dir, '%s-x-ROI_%d-x-%s-x-%d-x-%d-x-%d-x-%d.png' %
+                                    (os.path.basename(xml_file).replace('.xml', ''), roi_num, clss_name,
                                         bbox[0], bbox[1], bbox[2], bbox[3]))
     img_all_out.save(img_all_out_file)
 

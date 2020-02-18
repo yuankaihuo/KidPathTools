@@ -13,11 +13,11 @@ if __name__ == "__main__":
     # scn_file = '/home-local/pathology/raw/Case 15-1.scn'
     # xml_file = '/home-local/pathology/raw/Case 15-1.xml'
 
-    # source_dir = '/media/huoy1/48EAE4F7EAE4E264/Projects/from_haichun/R24 scan slides'
-    # output_dir = '/media/huoy1/48EAE4F7EAE4E264/Projects/detection/ROI_images/R24'
+    source_dir = '/media/huoy1/48EAE4F7EAE4E264/Projects/from_haichun/R24 scan slides'
+    output_dir = '/media/huoy1/48EAE4F7EAE4E264/Projects/detection/ROI_images/R24'
 
-    source_dir = '/media/huoy1/48EAE4F7EAE4E264/Projects/from_haichun/batch_1_data/scn'
-    output_dir = '/media/huoy1/48EAE4F7EAE4E264/Projects/detection/ROI_images/batch1'
+    # source_dir = '/media/huoy1/48EAE4F7EAE4E264/Projects/from_haichun/batch_1_data/scn'
+    # output_dir = '/media/huoy1/48EAE4F7EAE4E264/Projects/detection/ROI_images/batch1'
 
     # source_dir = '/Volumes/Yuzhe_Disk/Pathology/R24 scan slides'
     # output_dir = '/Volumes/Yuzhe_Disk/Pathology/Output_new'
