@@ -30,6 +30,7 @@ if __name__ == "__main__":
 
         try:
             simg = openslide.open_slide(scn_file)
+            print('can not read %s' % scn_file)
         except:
             print('can not read %s'%scn_file)
             continue
@@ -38,7 +39,7 @@ if __name__ == "__main__":
         # output_sub_dir = os.path.join(output_dir, fname)
         # if not os.path.exists(output_sub_dir):
         #     os.makedirs(output_sub_dir)
-        read_mask(simg, xml_file, output_dir)
+        # read_mask(simg, xml_file, output_dir)
 
 
 

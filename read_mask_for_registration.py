@@ -21,7 +21,7 @@ def get_bbox_from_mask(img):
     return rmin, rmax, cmin, cmax
 
 
-def read_annotations(simg, xml_file, output_dir):
+def read_annotations(simg, xml_file, output_dir, auto_xml_file = None):
     new_height = 4000
 
 
@@ -40,6 +40,13 @@ def read_annotations(simg, xml_file, output_dir):
             contours = doc['Annotations']['Annotation']['Regions']['Region'][0:14]
             contours2 = doc['Annotations']['Annotation']['Regions']['Region'][14:-1]
 
+    #auto boxes
+    if not auto_xml_file is None:
+        with open(auto_xml_file) as fd:
+            doc2 = xmltodict.parse(fd.read())
+            layer2 = doc2['Annotations']['Annotation']
+            contours2 = layer2['Regions']['Region']
+
     start_x = 0
     start_y = 0
 
@@ -49,9 +56,9 @@ def read_annotations(simg, xml_file, output_dir):
         bbox = get_bbox(simg, contour, start_x, start_y)
         bboxs_big.append(bbox)
 
-    img, cimg, mask, bbox = get_contour(simg, contours[2], start_x, start_y)
-    img_1 = Image.fromarray(img)
-    new_width = int(new_height * img_1.width / img_1.height)
+    # img, cimg, mask, bbox = get_contour(simg, contours[2], start_x, start_y)
+    # img_1 = Image.fromarray(img)
+    # new_width = int(new_height * img_1.width / img_1.height)
 
 
     bboxs_small = []
@@ -77,6 +84,7 @@ def read_annotations(simg, xml_file, output_dir):
                 numpy_out_file = os.path.join(output_dir, '%s-x-ROI_%d-x-BOX_%d.npy' %
                                               (os.path.basename(xml_file).replace('.xml', ''), bi, found_small_count))
                 if os.path.exists(numpy_out_file):
+                    found_small_count = found_small_count + 1
                     continue
 
                 relative_box = np.zeros(4)
@@ -117,9 +125,9 @@ def read_annotations(simg, xml_file, output_dir):
 
                 # bbox_dict['coordinate'] =
                 found_small_count = found_small_count+1
-                break
+                # break
         # bbox_dicts.append(bbox_dict)
-        assert found_small_count<2
+        # assert found_small_count<2
 
 
     # bboxs_big

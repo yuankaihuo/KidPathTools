@@ -13,8 +13,8 @@ if __name__ == "__main__":
     # scn_file = '/home-local/pathology/raw/Case 15-1.scn'
     # xml_file = '/home-local/pathology/raw/Case 15-1.xml'
 
-    source_dir = '/media/yuankai/MyDrive/pathology/scn'
-    output_dir = '/media/yuankai/MyDrive/pathology/coco-like/'
+    source_dir = '/media/huoy1/MyDrive/pathology/scn'
+    output_dir = '/media/huoy1/MyDrive/pathology/coco-like/'
     ROI_type = 'multi_ROI' #single ROI, each path one ROI, multi_ROI, each patch mutiple ROI
 
 

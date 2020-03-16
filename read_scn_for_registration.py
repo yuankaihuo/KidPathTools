@@ -19,7 +19,7 @@ if __name__ == "__main__":
     scn_files = glob.glob(os.path.join(source_dir,'*.svs'))
     scn_files.sort()
 
-    for i in range(1,len(scn_files)):
+    for i in range(9,len(scn_files)):
         scn_file = scn_files[i]
         basename = os.path.basename(scn_file)
         fname, surfix = os.path.splitext(basename)
