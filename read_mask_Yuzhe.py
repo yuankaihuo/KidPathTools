@@ -12,11 +12,16 @@ def read_mask(simg,xml_file,output_dir):
         doc = xmltodict.parse(fd.read())
     layers = doc['Annotations']['Annotation']
 
-    # start_x, start_y = get_nonblack_starting_point(simg)
-    start_x = np.int(simg.properties['openslide.bounds-x'])
-    start_y = np.int(simg.properties['openslide.bounds-y'])
-    width_x = np.int(simg.properties['openslide.bounds-width'])
-    height_y = np.int(simg.properties['openslide.bounds-height'])
+    try:
+        start_x = np.int(simg.properties['openslide.bounds-x'])
+        start_y = np.int(simg.properties['openslide.bounds-y'])
+        width_x = np.int(simg.properties['openslide.bounds-width'])
+        height_y = np.int(simg.properties['openslide.bounds-height'])
+    except:
+        start_x = 0
+        start_y = 0
+        width_x = np.int(simg.properties['aperio.OriginalWidth'])
+        height_y = np.int(simg.properties['aperio.OriginalHeight'])
     end_x = start_x + width_x
     end_y = start_y + height_y
 
