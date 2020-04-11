@@ -5,7 +5,7 @@ from PIL import Image
 import os
 import cv2
 
-def read_mask(simg,xml_file,output_dir):
+def read_mask(simg,xml_file,output_dir,boarder = 1.2):
 
     # read region
     with open(xml_file) as fd:
@@ -47,7 +47,7 @@ def read_mask(simg,xml_file,output_dir):
 
             for j in range(len(regions)):
                 contour = regions[j]
-                img, cimg, mask, bbox, img_iso, cimg_iso, mask_iso = get_contour(simg, contour, start_x, start_y)
+                img, cimg, mask, bbox, img_iso, cimg_iso, mask_iso = get_contour(simg, contour, start_x, start_y, boarder)
                 save_all_images(img, cimg, mask, bbox, img_iso, cimg_iso, mask_iso, output_dir, xml_file, j, clss_name)
 
 
@@ -208,7 +208,7 @@ def get_ROI(simg, region):
     img = np.array(img.convert('RGB'))
     return img
 
-def get_contour(simg, contour, start_x, start_y):
+def get_contour(simg, contour, start_x, start_y, boarder = 1.2):
     max_height = int(simg.properties['openslide.bounds-width'])
     max_widths = int(simg.properties['openslide.bounds-height'])
     vertices = contour['Vertices']['Vertex']
@@ -286,8 +286,8 @@ def get_contour(simg, contour, start_x, start_y):
 
     # Image.fromarray(cimg).show()
     length_iso = np.max([read_height, read_widths])
-    length_iso = np.int(length_iso*1.2)  #have boarder
-    iso_offset_h = np.int((length_iso-read_height)/2)
+    length_iso = np.int(length_iso*boarder)  #have boarder
+    iso_offset_h = np.int((length_iso - read_height) / 2)
     iso_offset_w = np.int((length_iso - read_widths) / 2)
 
     img_iso = simg.read_region((read_x0-iso_offset_h, read_y0-iso_offset_w), 0, (length_iso,length_iso))
