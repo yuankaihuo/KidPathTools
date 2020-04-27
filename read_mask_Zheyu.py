@@ -55,7 +55,8 @@ def read_mask(simg,xml_file,output_dir, Good_Bad_dir=None, match_file=False):
                     filepath = glob.glob(os.path.join(Good_Bad_dir, 'good', filename))
                     if filepath == []:
                         filepath = glob.glob(os.path.join(Good_Bad_dir, 'bad', filename))
-                        assert len(filepath) == 1
+                        if len(filepath) == 0:
+                            print('%s' % filepath)
                         contour['@Text'] = 'bad'
                     else:
                         assert len(filepath) == 1

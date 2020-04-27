@@ -26,7 +26,7 @@ if __name__ == "__main__":
     pixel_size = 2  # 4 micron for human, 2 micron for mouse
 
     roi_counts = {}
-    for i in range(9,len(xml_files)):
+    for i in range(len(xml_files)):
         xml_file = xml_files[i]
         basename = os.path.basename(xml_file)
         # print('%d working on %s' % (i,basename))

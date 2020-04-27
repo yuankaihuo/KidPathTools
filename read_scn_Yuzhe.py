@@ -13,22 +13,31 @@ if __name__ == "__main__":
     # scn_file = '/home-local/pathology/raw/Case 15-1.scn'
     # xml_file = '/home-local/pathology/raw/Case 15-1.xml'
 
-    proc_type = 'segmentation'  # 'classification'  'segmentation'
+    proc_type = 'classification'  # 'classification'  'segmentation'
 
     if proc_type == 'classification':
         # source_dir = '/media/huoy1/48EAE4F7EAE4E264/Projects/from_haichun/R24 scan slides'
+        # xml_root_dir = '/media/huoy1/48EAE4F7EAE4E264/Projects/from_haichun/R24 scan slides'
         # output_dir = '/media/huoy1/48EAE4F7EAE4E264/Projects/detection/ROI_images/R24'
 
-        source_dir = '/media/huoy1/48EAE4F7EAE4E264/Projects/from_haichun/batch_1_data/scn'
-        output_dir = '/media/huoy1/48EAE4F7EAE4E264/Projects/detection/ROI_images/batch1'
+        # source_dir = '/media/huoy1/48EAE4F7EAE4E264/Projects/from_haichun/batch_1_data/scn'
+        # xml_root_dir = '/media/huoy1/48EAE4F7EAE4E264/Projects/from_haichun/batch_1_data/scn'
+        # output_dir = '/media/huoy1/48EAE4F7EAE4E264/Projects/detection/ROI_images/batch1'
+
+
+        source_dir = '/media/huoy1/48EAE4F7EAE4E264/Projects/from_haichun/R24 scan slides'
+        xml_root_dir = '/media/huoy1/48EAE4F7EAE4E264/Projects/from_haichun/R24_scan_slides_manual_QA'
+        output_dir = '/media/huoy1/48EAE4F7EAE4E264/Projects/detection/ROI_images/R24_QA'
 
         boarder = 1.2  # two times larger
 
     if proc_type == 'segmentation':
         source_dir = '/media/huoy1/48EAE4F7EAE4E264/Projects/from_haichun/batch_1_data/scn'
+        xml_root_dir = '/media/huoy1/48EAE4F7EAE4E264/Projects/from_haichun/batch_1_data/scn'
         output_dir = '/media/huoy1/48EAE4F7EAE4E264/Projects/detection/ROI_images/batch1_boarder2'
 
         # source_dir = '/media/huoy1/48EAE4F7EAE4E264/Projects/from_haichun/R24 scan slides'
+        # xml_root_dir = '/media/huoy1/48EAE4F7EAE4E264/Projects/from_haichun/R24 scan slides'
         # output_dir = '/media/huoy1/48EAE4F7EAE4E264/Projects/detection/ROI_images/R24_boarder2'
 
         boarder = 2.0  # two times larger
@@ -49,7 +58,10 @@ if __name__ == "__main__":
 
         basename = os.path.basename(scn_file)
         fname, surfix = os.path.splitext(basename)
-        xml_file = os.path.join(source_dir,fname+'.xml')
+        xml_file = os.path.join(xml_root_dir,fname+'.xml')
+
+        if not os.path.exists(xml_file):
+            continue
 
         # if basename == 'Case 18-1.scn':
         #     aaa = 1

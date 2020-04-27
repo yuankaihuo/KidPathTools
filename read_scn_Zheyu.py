@@ -17,10 +17,17 @@ if __name__ == "__main__":
         # output_dir = '/home/zheyuzhu/Desktop/022619/0.2_good_bad'
         # Good_Bad_dir = '/media/zheyuzhu/My Passport/qa/022619/0.2qa'
 
-        source_dir = '/home/zheyuzhu/Desktop/081617_ADE/0.2'
-        output_dir = '/home/zheyuzhu/Desktop/081617_ADE/0.2_good_bad'
-        Good_Bad_dir = '/media/zheyuzhu/My Passport/qa/081617_ADE/0.2qa'
+        # source_dir = '/home/zheyuzhu/Desktop/081617_ADE/0.2'
+        # output_dir = '/home/zheyuzhu/Desktop/081617_ADE/0.2_good_bad'
+        # Good_Bad_dir = '/media/zheyuzhu/My Passport/qa/081617_ADE/0.2qa'
 
+        # source_dir = '/media/huoy1/48EAE4F7EAE4E264/Projects/fromZheyu/xml_file-20200411T133639Z-001/xml_file/022619_revised/0.2_good_bad'
+        # output_dir = '/media/huoy1/48EAE4F7EAE4E264/Projects/fromZheyu/xml_file_yuankai_QA/022619/'
+        # Good_Bad_dir = '/media/huoy1/48EAE4F7EAE4E264/Projects/fromZheyu/022619'
+
+        source_dir = '/media/huoy1/48EAE4F7EAE4E264/Projects/fromZheyu/xml_file-20200411T133639Z-001/xml_file/081617_ADE_revised/0.2_good_bad'
+        output_dir = '/media/huoy1/48EAE4F7EAE4E264/Projects/fromZheyu/xml_file_yuankai_QA/081617_ADE/'
+        Good_Bad_dir = '/media/huoy1/48EAE4F7EAE4E264/Projects/fromZheyu/081617_ADE'
 
         xml_files = glob.glob(os.path.join(source_dir,'*.xml'))
         for i in range(len(xml_files)):
