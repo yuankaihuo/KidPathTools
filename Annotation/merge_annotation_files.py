@@ -79,6 +79,10 @@ def merge_raw_seg(regions_raw, regions_seg):
         if match_ind == []:
             contour_raw['@Text'] = 'miss'
         else:
+            if len(match_ind)>1:
+                print('!!!!!!!!!!!!!!!! %d match two index' % match_ind[1])
+                match_ind = [match_ind[0]]
+
             assert(len(match_ind)) == 1
             match_ind = match_ind[0]
             id = regions_raw[j]['@Id']
@@ -119,7 +123,13 @@ def write_xml_file(input_raw_file, regions_merge, output_file):
 if __name__ == "__main__":
 
     # subname = '23499_2017-04-07 20_15_04.xml'
-    subname = '23681_2017-04-07 20_27_42.xml'
+    # subname = '23681_2017-04-07 20_27_42.xml'
+    # subname = '24738_2017-04-08 04_30_36.xml'
+    # subname = '24739_2017-04-08 10_29_55.xml'
+    # subname = '25119_2017-04-07 23_56_37.xml'
+
+    # subname = '25118_2017-04-07 23_48_31.xml'
+    subname = '25121_2017-04-07 21_05_03.xml'
 
     input_raw_file = os.path.join('/media/huoy1/48EAE4F7EAE4E264/Projects/fromGe/raw',subname)
     input_seg_file = os.path.join('/media/huoy1/48EAE4F7EAE4E264/Projects/fromGe/seg',subname)
