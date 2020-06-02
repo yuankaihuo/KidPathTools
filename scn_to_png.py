@@ -355,8 +355,8 @@ def scn_to_png_whole_slide(simg,xml_file,output_dir, create_number_per_image, im
     img_out_file = os.path.join(output_img_dir, png_name)
     mask_out_file = os.path.join(output_mask_dir, png_name)
 
-    if os.path.exists(img_all_out_file) and os.path.exists(img_out_file) and os.path.exists(mask_out_file):
-        return img_out_file, mask_out_file
+    # if os.path.exists(img_all_out_file) and os.path.exists(img_out_file) and os.path.exists(mask_out_file):
+    #     return img_out_file, mask_out_file
 
     start_x, start_y = get_nonblack_starting_point(simg)
     end_x, end_y = get_nonblack_ending_point(simg)

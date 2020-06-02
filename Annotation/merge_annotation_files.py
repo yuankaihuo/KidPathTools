@@ -122,14 +122,14 @@ def write_xml_file(input_raw_file, regions_merge, output_file):
 
 if __name__ == "__main__":
 
-    # subname = '23499_2017-04-07 20_15_04.xml'
-    # subname = '23681_2017-04-07 20_27_42.xml'
-    # subname = '24738_2017-04-08 04_30_36.xml'
-    # subname = '24739_2017-04-08 10_29_55.xml'
-    # subname = '25119_2017-04-07 23_56_37.xml'
+    # subname = '23499_2017-04-07 20_15_04.xml'  # 290
+    # subname = '23681_2017-04-07 20_27_42.xml'  # 550
+    # subname = '24738_2017-04-08 04_30_36.xml' # 313
+    # subname = '24739_2017-04-08 10_29_55.xml' #164
+    # subname = '25119_2017-04-07 23_56_37.xml'  #69
 
-    # subname = '25118_2017-04-07 23_48_31.xml'
-    subname = '25121_2017-04-07 21_05_03.xml'
+    # subname = '25118_2017-04-07 23_48_31.xml'    #149 glomeruli val
+    subname = '25121_2017-04-07 21_05_03.xml'   #  626 glomeruli val
 
     input_raw_file = os.path.join('/media/huoy1/48EAE4F7EAE4E264/Projects/fromGe/raw',subname)
     input_seg_file = os.path.join('/media/huoy1/48EAE4F7EAE4E264/Projects/fromGe/seg',subname)

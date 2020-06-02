@@ -25,6 +25,8 @@ if __name__ == "__main__":
     create_number_per_image = 10
     img_size = [512,512]
 
+    scn_files = scn_files[23:24]
+
     for i in range(len(scn_files)):
         scn_file = scn_files[i]
         basename = os.path.basename(scn_file)
