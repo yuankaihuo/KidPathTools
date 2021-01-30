@@ -78,13 +78,7 @@ def walklevel(some_dir, level=1):
             del dirs[:]
 
 def main():
-    coco_output = {
-        "info": INFO,
-        "licenses": LICENSES,
-        "categories": CATEGORIES,
-        "images": [],
-        "annotations": []
-    }
+
 
     image_id = 1
     segmentation_id = 1
@@ -110,64 +104,78 @@ def main():
     #     print(files[20:])
     #     print(len(files[20:]))
 
-    # filter for jpeg images
-    for root, folders, files in walklevel(INPUT_ROOT_DIR, 0):
-        # image_files = filter_for_jpeg(root, files)
+    for type in types:
 
-        # go through each image
-        for image_folder in folders:
-            # print(image_folder)
-            folder_path = os.path.join(INPUT_ROOT_DIR, image_folder)
-            image_path = os.path.join(folder_path, 'image', 'image.png')
+        coco_output = {
+            "info": INFO,
+            "licenses": LICENSES,
+            "categories": CATEGORIES,
+            "images": [],
+            "annotations": []
+        }
 
-            image = Image.open(image_path)
-            image_info = pycococreatortools.create_image_info(
-                image_id, os.path.basename(image_folder), image.size)
+        # filter for jpeg images
+        for root, folders, files in walklevel(INPUT_ROOT_DIR, 0):
+            # image_files = filter_for_jpeg(root, files)
+            json_file = os.path.join(ROOT_DIR, 'MoNuSeg_%s2021.json' % type)
 
-            print(image_info)
+            # go through each image
+            for image_folder in folders:
+                # print(image_folder)
+                folder_path = os.path.join(INPUT_ROOT_DIR, image_folder)
+                image_path = os.path.join(folder_path, 'image', os.path.basename(folder_path)+'.png')
 
-            coco_output["images"].append(image_info)
+                image = Image.open(image_path)
+                image_info = pycococreatortools.create_image_info(
+                    image_id, os.path.basename(image_folder), image.size)
 
-            INPUT_MASK_DIR = os.path.join(folder_path, 'masks')
+                print(image_info)
+                subname = os.path.basename(folder_path).split('-')[:6]
+                subname = '-'.join(subname)
+                if subname in sublist[type]:
+                    coco_output["images"].append(image_info)
 
-            # filter for associated png annotations
-            for root, _, files in os.walk(INPUT_MASK_DIR):
-                annotation_files = files
+                    INPUT_MASK_DIR = os.path.join(folder_path, 'masks')
 
-                # go through each associated annotation
-                for annotation_filename in annotation_files:
-                    annotation_path = os.path.join(folder_path, 'masks', annotation_filename)
-                    IMAGE_DIR = os.path.join(ROOT_DIR, 'train')
+                    # filter for associated png annotations
+                    for root, _, files in os.walk(INPUT_MASK_DIR):
+                        annotation_files = files
 
-                    # Create directories if they don't exist
-                    if not os.path.exists(IMAGE_DIR):
-                        os.makedirs(IMAGE_DIR)
+                        # go through each associated annotation
+                        for count, annotation_filename in enumerate(annotation_files):
+                            if count % 100 == 0:
+                                print('.', end='')
+                            annotation_path = os.path.join(folder_path, 'masks', annotation_filename)
+                            IMAGE_DIR = os.path.join(ROOT_DIR, type)
 
-                    image_filename_new = os.path.join(ROOT_DIR, 'train', image_folder + '.png')
-                    os.system("cp '%s' '%s'" % (image_path, image_filename_new))
+                            # Create directories if they don't exist
+                            if not os.path.exists(IMAGE_DIR):
+                                os.makedirs(IMAGE_DIR)
 
-                    # class_id = [x['id'] for x in CATEGORIES if x['name'] in new_annotation_name][0]
-                    class_id = 1
+                            image_filename_new = os.path.join(ROOT_DIR, type, image_folder + '.png')
+                            os.system("cp '%s' '%s'" % (image_path, image_filename_new))
 
-                    category_info = {'id': class_id, 'is_crowd': 'crowd' in image_folder}
-                    binary_mask = np.asarray(Image.open(annotation_path)
-                                             .convert('1')).astype(np.uint8)
+                            # class_id = [x['id'] for x in CATEGORIES if x['name'] in new_annotation_name][0]
+                            class_id = 1
 
-                    annotation_info = pycococreatortools.create_annotation_info(
-                        segmentation_id, image_id, category_info, binary_mask,
-                        image.size, tolerance=2)
+                            category_info = {'id': class_id, 'is_crowd': 'crowd' in image_folder}
+                            binary_mask = np.asarray(Image.open(annotation_path)
+                                                     .convert('1')).astype(np.uint8)
 
-                    # print(annotation_info)
+                            annotation_info = pycococreatortools.create_annotation_info(
+                                segmentation_id, image_id, category_info, binary_mask,
+                                image.size, tolerance=2)
 
-                    if annotation_info is not None:
-                        coco_output["annotations"].append(annotation_info)
+                            if annotation_info is not None:
+                                coco_output["annotations"].append(annotation_info)
 
-                    segmentation_id = segmentation_id + 1
+                            segmentation_id = segmentation_id + 1
 
-            image_id = image_id + 1
+                    image_id = image_id + 1
+                    print()
 
-    with open(os.path.join(ROOT_DIR, 'MoNuSeg2018-train.json').format(ROOT_DIR), 'w') as output_json_file:
-        json.dump(coco_output, output_json_file)
+        with open(json_file.format(ROOT_DIR), 'w') as output_json_file:
+            json.dump(coco_output, output_json_file)
 
 
 if __name__ == "__main__":
