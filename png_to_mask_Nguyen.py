@@ -101,6 +101,8 @@ def save_cropped_img_mask(big_img_file, big_mask_dir, output_dir, create_number_
     width = crop_size[1]
 
     for i in range(create_number_per_image):
+        print('.',end='')
+
         assert img.shape[0] >= height
         assert img.shape[1] >= width
 
@@ -150,15 +152,37 @@ def save_cropped_img_mask(big_img_file, big_mask_dir, output_dir, create_number_
                 crop_mask.save(mask_out)
 
                 num_mask += 1
+    print()
     return
 
 if __name__ == "__main__":
+    # input_dir = '/home/sybbure/CircleNet/MoNuSegTestData'
+    # # Obtain list of files
+    # files = []
+    # for (root, dirs, files) in os.walk(input_dir):
+    #     files = files
+    #     break
+    # for file in files:
+    #     format = file.split('.')[-1]
+    #     subname = file.split('.')[0]
+    #     print(format)
+    #     if format == 'tif':
+    #         cur_image_path = os.path.join(input_dir, file)
+    #         new_image_dir = os.path.join(input_dir, "images", file)
+    #         os.system("cp '%s' '%s'" % (cur_image_path, new_image_dir))
+    #
+    #     elif format == 'xml':
+    #         cur_image_path = os.path.join(input_dir, file)
+    #         new_image_dir = os.path.join(input_dir, "xml", file)
+    #         os.system("cp '%s' '%s'" % (cur_image_path, new_image_dir))
+
+
     # Define the directories for the input and output
     # png_file = "/home/sybbure/CircleNet/MoNuSeg Training Data/Tissue Images/TCGA-18-5592-01Z-00-DX1.png"
     # xml_file = "/home/sybbure/CircleNet/MoNuSeg Training Data/Annotations/TCGA-18-5592-01Z-00-DX1.xml"
 
-    input_dir = '/home/sybbure/CircleNet/MoNuSeg Training Data/Tissue Images'
-    label_dir = '/home/sybbure/CircleNet/MoNuSeg Training Data/Annotations/'
+    input_dir = '/home/sybbure/CircleNet/MoNuSegTestData/images'
+    label_dir = '/home/sybbure/CircleNet/MoNuSegTestData/xml'
     output_dir = '/home/sybbure/CircleNet/MoNuSeg-Test/png-instance-segmentation'
 
     create_number_per_image = 10
@@ -177,8 +201,8 @@ if __name__ == "__main__":
     for file in png_files:
         print(file)
         png_file = os.path.join(input_dir, file)
-        xml_file = (os.path.join(label_dir, file)).replace('.png', '.xml')
-
+        # xml_file = (os.path.join(label_dir, file)).replace('.png', '.xml')
+        xml_file = (os.path.join(label_dir, file)).replace('.tif', '.xml')
         # Get the big img and mask
         big_img, big_mask = png_to_big_mask(png_file, xml_file, output_dir)
 
