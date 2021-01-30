@@ -198,8 +198,8 @@ if __name__ == "__main__":
     # print(png_files)
 
     # Iterate over images
-    for file in png_files:
-        print(file)
+    for count, file in enumerate(png_files):
+        print(count + ':', file)
         png_file = os.path.join(input_dir, file)
         # xml_file = (os.path.join(label_dir, file)).replace('.png', '.xml')
         xml_file = (os.path.join(label_dir, file)).replace('.tif', '.xml')
