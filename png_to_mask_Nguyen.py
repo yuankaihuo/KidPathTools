@@ -41,6 +41,8 @@ def png_to_big_mask(png_file, xml_file, output_dir):
 
     # For each region of interest, create a uniquely valued mask and save
     for ci in range(len(contours)):
+        if ci % 100 == 0:
+            print(".", end="")
         mask = np.zeros(img.shape, dtype=np.uint8)
         contour = contours[ci]
         vertices = contour["Vertices"]["Vertex"]
@@ -71,6 +73,8 @@ def png_to_big_mask(png_file, xml_file, output_dir):
 
     img_out = Image.fromarray(img)
     img_out.save(img_out_file)
+
+    print()
 
     return img_out_file, mask_dir
 
