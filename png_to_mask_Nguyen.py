@@ -4,6 +4,7 @@ import numpy as np
 from PIL import Image
 from skimage.measure import label
 import cv2
+import random
 
 def png_to_big_mask(png_file, xml_file, output_dir):
     # Read the XML file
@@ -20,7 +21,7 @@ def png_to_big_mask(png_file, xml_file, output_dir):
         contours = Masklayer['Regions']['Region']
 
     # Create a unique directory for each image
-    output_img_dir = os.path.join(output_dir, file.split(".")[0])
+    output_img_dir = os.path.join(output_dir,"whole", file.split(".")[0])
 
     if not os.path.exists(output_img_dir):
         os.makedirs(output_img_dir)
@@ -52,13 +53,10 @@ def png_to_big_mask(png_file, xml_file, output_dir):
             cnt[vi, 0, 0] = float(vertices[vi]['@X'])
             cnt[vi, 0, 1] = float(vertices[vi]['@Y'])
 
-        # Draw contours (note - color is green)
-        # cv2.drawContours(cimg, [cnt.astype(int)], -1, (0, 255, 0), 1)
-
         # Draw masks (note - color is white and thickness = -1)
         cv2.drawContours(mask, [cnt.astype(int)], -1, (255, 255, 255), -1)
 
-        mask_name = "mask_%s.png" % ci
+        mask_name = "mask_%03d.png" % ci
         # cimg_out_file = os.path.join(output_cimg_dir, )
         mask_out_file = os.path.join(mask_dir, mask_name)
 
@@ -74,31 +72,81 @@ def png_to_big_mask(png_file, xml_file, output_dir):
     img_out = Image.fromarray(img)
     img_out.save(img_out_file)
 
-    return img_dir, mask_dir
+    return img_out_file, mask_dir
 
-def save_cropped_img_mask(big_img_file, big_mask_file, output_dir, create_number_per_image, fname):
+def save_cropped_img_mask(big_img_file, big_mask_dir, output_dir, create_number_per_image, fname, crop_size=(512, 512)):
     # Create folders for output
-    output_QA_dir = os.path.join(output_dir,'QA_roi')
-    output_img_dir = os.path.join(output_dir,'train_roi')
-    output_mask_dir = os.path.join(output_dir,'labels_roi')
+    # output_QA_dir = os.path.join(output_dir,'QA_roi')
+    # output_img_dir = os.path.join(output_dir,'train_roi')
+    # output_mask_dir = os.path.join(output_dir,'labels_roi')
+    output_roi_dir = os.path.join(output_dir, "roi")
 
-    if not os.path.exists(output_QA_dir):
-        os.makedirs(output_QA_dir)
-    if not os.path.exists(output_img_dir):
-        os.makedirs(output_img_dir)
-    if not os.path.exists(output_mask_dir):
-        os.makedirs(output_mask_dir)
+    # if not os.path.exists(output_QA_dir):
+    #     os.makedirs(output_QA_dir)
+    # if not os.path.exists(output_img_dir):
+    #     os.makedirs(output_img_dir)
+    # if not os.path.exists(output_mask_dir):
+    #     os.makedirs(output_mask_dir)
 
-    roi_count = 0
+    if not os.path.exists(output_roi_dir):
+        os.makedirs(output_roi_dir)
 
-    # Get a list of ROI
-    big_mask = Image.open(big_mask_file)
-    big_mask_binary = np.array(big_mask.convert('L'))
+    img = np.array(Image.open(os.path.join(big_img_file)))
 
-    big_img = Image.open(big_img_file)
-    big_img_arr = np.array(big_img)
+    height = crop_size[0]
+    width = crop_size[1]
 
-    labels = label(big_mask_binary)
+    for i in range(create_number_per_image):
+        assert img.shape[0] >= height
+        assert img.shape[1] >= width
+
+        # Random crop
+        x = random.randint(0, img.shape[1] - width)
+        y = random.randint(0, img.shape[0] - height)
+        crop_img = img[y:y + height, x:x + width]
+
+        crop_img_name = '%s-contour%03d-x-%d-y-%d' % (fname.split(".")[0], i, x, y)
+
+        dir = os.path.join(output_roi_dir, crop_img_name)
+        if not os.path.exists(dir):
+            os.makedirs(dir)
+
+        crop_img_dir = os.path.join(dir, 'image')
+        if not os.path.exists(crop_img_dir):
+            os.makedirs(crop_img_dir)
+
+        crop_mask_dir = os.path.join(dir, 'masks')
+        if not os.path.exists(crop_mask_dir):
+            os.makedirs(crop_mask_dir)
+
+        crop_img_path = os.path.join(crop_img_dir, crop_img_name + '.png')
+        img_out = Image.fromarray(crop_img)
+        img_out.save(crop_img_path)
+
+        for (root, dirs, files) in os.walk(big_mask_dir):
+            mask_files = files
+            break
+
+        num_mask = 0
+        for mask_file in mask_files:
+            mask_file_path = os.path.join(big_mask_dir, mask_file)
+            mask = Image.open(mask_file_path)
+            mask = np.array(mask)
+
+            # Crop the mask
+            crop_mask = mask[y:y + height, x:x + width]
+            assert crop_img.shape[0] == crop_mask.shape[0]
+            assert crop_img.shape[1] == crop_mask.shape[1]
+
+            # If mask is not empty, then save it
+            if max(crop_mask.ravel()) != 0:
+                mask_out = os.path.join(crop_mask_dir, "mask%04d.png" % (num_mask))
+
+                crop_mask = Image.fromarray(mask)
+                crop_mask.save(mask_out)
+
+                num_mask += 1
+    return
 
 if __name__ == "__main__":
     # Define the directories for the input and output
@@ -107,7 +155,7 @@ if __name__ == "__main__":
 
     input_dir = '/home/sybbure/CircleNet/MoNuSeg Training Data/Tissue Images'
     label_dir = '/home/sybbure/CircleNet/MoNuSeg Training Data/Annotations/'
-    output_dir = "/home/sybbure/CircleNet/MoNuSeg-Test/coco-mask"
+    output_dir = '/home/sybbure/CircleNet/MoNuSeg-Test/png-instance-segmentation'
 
     create_number_per_image = 10
     img_size = [1000, 1000]
@@ -118,8 +166,12 @@ if __name__ == "__main__":
         png_files = files
         break
 
+    # png_files = png_files[0:2]
+    # print(png_files)
+
     # Iterate over images
     for file in png_files:
+        print(file)
         png_file = os.path.join(input_dir, file)
         xml_file = (os.path.join(label_dir, file)).replace('.png', '.xml')
 
@@ -127,6 +179,4 @@ if __name__ == "__main__":
         big_img, big_mask = png_to_big_mask(png_file, xml_file, output_dir)
 
         # Data augmentation - crop the image and save it
-        # save_cropped_img_mask(big_img, big_mask, output_dir, create_number_per_image, file)
-
-
+        save_cropped_img_mask(big_img, big_mask, output_dir, create_number_per_image, file)
