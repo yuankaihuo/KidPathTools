@@ -1,0 +1,62 @@
+-------GLOMERULAR MORPHOLOGY------
+Disappearing GS
+Solidified GS
+Obsolescent GS
+Segmental GS
+Glomerulomegaly
+Immature glomerulus
+Periglomerular fibrosis
+
+------------BOWMAN'S CAPSULE-----------
+Enlarged capsule space
+Capsular hyaline drop
+Cellular crescent
+Fibrocellular crescent
+Fibrous crescent
+Pseudocrescent
+Adhesion
+
+----------------------GBM---------------------
+Capillary collapse
+Capillary microaneurysm
+GBM duplication
+GBM luciencies
+GBM spikes/spicules
+Thickened GBM
+Wire loop
+
+-----------------CAPILLARY------------------
+Thrombus
+Hyaline pseudothrombus
+Lipoprotein thrombus
+Mesangial expansion (Nodular)
+Mesangiolysis
+Hyalinosis
+Fibrinoid necrosis
+
+---------------RESIDENT CELLS--------------
+Podocyte capping
+Podocyte hyperplasia
+Podocyte hypertrophy
+Podocyte protein droplets
+Endotheliosis
+Mesangial hypercellularity
+
+-------------INFILTRATED CELLS------------
+Glomerular congestion
+Endocapillary hypercellularity
+Intraglomerular leukocyte infiltration
+Membranoproliferative pattern
+Foam
+Karyorrhexis
+
+--------------COLOR PATTERN---------------
+H&E
+PAS
+Silver
+Massion
+IF
+EM
+
+------------NOT A GLOMERULUS------------
+Tubular
