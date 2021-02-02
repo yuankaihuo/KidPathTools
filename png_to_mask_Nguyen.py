@@ -5,6 +5,7 @@ from PIL import Image
 from skimage.measure import label
 import cv2
 import random
+from imantics import Polygons, Mask
 
 def png_to_big_mask(png_file, xml_file, output_dir):
     # Read the XML file
@@ -38,6 +39,7 @@ def png_to_big_mask(png_file, xml_file, output_dir):
     # Open the image
     img = Image.open(png_file)
     img = np.array(img)  # read in image as NumPy array
+    cimg = img.copy()
 
     # For each region of interest, create a uniquely valued mask and save
     for ci in range(len(contours)):
@@ -55,6 +57,9 @@ def png_to_big_mask(png_file, xml_file, output_dir):
             cnt[vi, 0, 0] = float(vertices[vi]['@X'])
             cnt[vi, 0, 1] = float(vertices[vi]['@Y'])
 
+        # Draw contour
+        cv2.drawContours(cimg, [cnt.astype(int)], -1, (0, 255, 0), 1)
+
         # Draw masks (note - color is white and thickness = -1)
         cv2.drawContours(mask, [cnt.astype(int)], -1, (255, 255, 255), -1)
 
@@ -70,9 +75,13 @@ def png_to_big_mask(png_file, xml_file, output_dir):
 
     # Save the image
     img_out_file = os.path.join(img_dir, "image.png")
+    cimg_out_file = os.path.join(img_dir, "QA_image.png")
 
     img_out = Image.fromarray(img)
     img_out.save(img_out_file)
+
+    cimg_out = Image.fromarray(cimg)
+    cimg_out.save(cimg_out_file)
 
     print()
 
@@ -111,6 +120,8 @@ def save_cropped_img_mask(big_img_file, big_mask_dir, output_dir, create_number_
         y = random.randint(0, img.shape[0] - height)
         crop_img = img[y:y + height, x:x + width]
 
+        crop_cimg = crop_img.copy()
+
         crop_img_name = '%s-contour%03d-x-%d-y-%d' % (fname.split(".")[0], i, x, y)
 
         dir = os.path.join(output_roi_dir, crop_img_name)
@@ -148,11 +159,20 @@ def save_cropped_img_mask(big_img_file, big_mask_dir, output_dir, create_number_
             if max(crop_mask.ravel()) != 0:
                 mask_out = os.path.join(crop_mask_dir, "mask%04d.png" % (num_mask))
 
-                crop_mask = Image.fromarray(mask)
+                # polygons = mask_out.convert('1')).astype(np.uint8)
+
+                # cv2.drawContours(crop_cimg, polygons,  -1, (0, 255, 0), 1)
+
+                crop_mask = Image.fromarray(crop_mask)
                 crop_mask.save(mask_out)
 
                 num_mask += 1
-    print()
+
+        # crop_cimg_path = os.path.join(crop_img_dir, 'QAimg.png')
+        # crop_cimg = Image.fromarray(crop_cimg)
+        # crop_cimg.save(crop_cimg_path)
+
+    print("")
     return
 
 if __name__ == "__main__":
@@ -181,9 +201,9 @@ if __name__ == "__main__":
     # png_file = "/home/sybbure/CircleNet/MoNuSeg Training Data/Tissue Images/TCGA-18-5592-01Z-00-DX1.png"
     # xml_file = "/home/sybbure/CircleNet/MoNuSeg Training Data/Annotations/TCGA-18-5592-01Z-00-DX1.xml"
 
-    input_dir = '/home/sybbure/CircleNet/MoNuSegTestData/images'
-    label_dir = '/home/sybbure/CircleNet/MoNuSegTestData/xml'
-    output_dir = '/home/sybbure/CircleNet/MoNuSeg-Test/png-instance-segmentation'
+    input_dir = '/home/sybbure/CircleNet/MoNuSeg Training Data/Tissue Images'
+    label_dir = '/home/sybbure/CircleNet/MoNuSeg Training Data/Annotations'
+    output_dir = '/home/sybbure/CircleNet/MoNuSeg-Test/png-instance-2'
 
     create_number_per_image = 10
     img_size = [1000, 1000]
@@ -199,10 +219,10 @@ if __name__ == "__main__":
 
     # Iterate over images
     for count, file in enumerate(png_files):
-        print(count + ':', file)
+        print(count, ':', file)
         png_file = os.path.join(input_dir, file)
         # xml_file = (os.path.join(label_dir, file)).replace('.png', '.xml')
-        xml_file = (os.path.join(label_dir, file)).replace('.tif', '.xml')
+        xml_file = (os.path.join(label_dir, file.split('.')[0])) + '.xml'
         # Get the big img and mask
         big_img, big_mask = png_to_big_mask(png_file, xml_file, output_dir)
 

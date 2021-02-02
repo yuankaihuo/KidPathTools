@@ -8,9 +8,9 @@ import numpy as np
 from pycococreatortools import pycococreatortools
 
 
-INPUT_ROOT_DIR = '/home/sybbure/CircleNet/MoNuSeg-Test/png-instance-segmentation/roi'
+INPUT_ROOT_DIR = '/home/sybbure/CircleNet/MoNuSeg-Test/png-instance-2/roi'
 
-ROOT_DIR = '/home/sybbure/CircleNet/MoNuSeg-Test/png-coco-like'
+ROOT_DIR = '/home/sybbure/CircleNet/MoNuSeg-Test/png-coco-like-3'
 
 INFO = {
     "description": "MICCAI 2018 - MoNuSeg",
@@ -127,7 +127,7 @@ def main():
 
                 image = Image.open(image_path)
                 image_info = pycococreatortools.create_image_info(
-                    image_id, os.path.basename(image_folder), image.size)
+                    image_id, os.path.basename(image_folder) + '.png', image.size)
 
                 print(image_info)
                 subname = os.path.basename(folder_path).split('-')[:6]
