@@ -1,13 +1,7 @@
-import xmltodict
 import numpy as np
-from PIL import Image
 import os
-import cv2
 import glob
-from math import sqrt
 import json
-import pycocotools.coco as cocoapi
-from collections import OrderedDict
 
 # Given an *.json annotation in COCO format, this script will convert the annotation from COCO format to CircleNet.
 
@@ -181,9 +175,6 @@ def convert_region_seg_to_circle(data):
                 cnt_seg[vi//2, 1] = vertices_seg[vi]
 
         x,y,r = numerical_stable_circle(cnt_seg)
-        x = int(x)
-        y = int(y)
-        r = int(np.ceil(r))
 
         anns_all[i]['circle_center'] = [x, y]
         anns_all[i]['circle_radius'] = r
@@ -194,9 +185,8 @@ def convert_region_seg_to_circle(data):
 def read_json(json_file):
     with open(json_file, 'r') as fd:
         data = json.load(fd)
-    coco = cocoapi.COCO(json_file)
 
-    return data, coco
+    return data
 
 
 def write_json_file(new_data, output_file):
@@ -212,7 +202,7 @@ if __name__ == "__main__":
 
     for xi in range(len(json_list)):
         json_file = json_list[xi]
-        data, coco = read_json(json_file)
+        data = read_json(json_file)
         output_file = json_file.replace(seg_root_dir, circle_root_dir)
 
         new_data = convert_region_seg_to_circle(data)
